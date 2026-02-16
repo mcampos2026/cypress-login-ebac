@@ -1,0 +1,20 @@
+{
+  "loginValido": {
+    "email": "usuario_valido@teste.com",
+    "senha": "senha_valida"
+  },
+  "senhaInvalida": {
+    "email": "usuario_valido@teste.com",
+    "senha": "senha_errada"
+  },
+  "emailInvalido": {
+  "email": "email_invalido@teste.com",
+  "senha": "senha_valida",
+  "mensagemErro": "Endereço de e-mail desconhecido"
+
+  },
+  "camposVazios": {
+    "email": "",
+    "senha": ""
+  }
+}
