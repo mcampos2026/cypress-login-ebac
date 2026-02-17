@@ -8,23 +8,18 @@ on:
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
         with:
-          node-version: 18
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Cypress run (E2E)
-        run: npx cypress run
+          node-version: 18.19.0
+          install-command: npm ci
+          command: npx cypress run
 
       - name: Upload screenshots/videos (only on failure)
         if: failure()
