@@ -5,55 +5,23 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
-concurrency:
-  group: cypress-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: true
-
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
     timeout-minutes: 35
 
-    env:
-      # Ajuda a reduzir ruído e melhora estabilidade
-      CI: true
-      CYPRESS_CACHE_FOLDER: ~/.cache/Cypress
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
         with:
           node-version: 18.19.0
-          cache: npm
+          install-command: npm ci
+          command: npx cypress run
 
-      - name: Cache Cypress binary
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/Cypress
-          key: cypress-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: |
-            cypress-${{ runner.os }}-
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Verify Cypress binary
-        run: npm run cy:verify
-
-      # Opção A: Electron (mais rápido/estável em CI)
-      - name: Run Cypress (electron)
-        run: npm run cy:run
-
-      # Se você preferir Chrome, troque o step acima por este:
-      # - name: Run Cypress (chrome)
-      #   run: npm run cy:run:chrome
-
-      # Upload sempre (pra evidência até em sucesso)
       - name: Upload screenshots
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-screenshots
@@ -61,18 +29,9 @@ jobs:
           if-no-files-found: ignore
 
       - name: Upload videos
-        if: always()
+        if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-videos
           path: cypress/videos
           if-no-files-found: ignore
-
-      # Em falha, coleta mais info do ambiente
-      - name: Debug info (only on failure)
-        if: failure()
-        run: |
-          echo "Node:" && node -v
-          echo "NPM:" && npm -v
-          echo "OS:" && uname -a
-          echo "Cypress cache:" && ls -la ~/.cache/Cypress || true
